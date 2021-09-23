@@ -3,7 +3,7 @@
 
 """
 RPN Console Program
-Please run in UNIX
+Please run in Linux/UNIX bash.
 """
 
 import re
@@ -13,13 +13,7 @@ from src._rpn import Rpn
 from src._types import StrList
 
 
-# - Header and prompt font formatting.
-header_line_colors = [
-    "1;35",
-    "6;33", 
-    "0;33;40",
-    ]
-
+# - Header and prompt formatting.
 header_lines = [
     "\x1b[1;35mWelcome to the Reverse Polish Notation Calculator!\x1b[0m",
     "",
