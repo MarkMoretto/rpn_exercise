@@ -1,22 +1,22 @@
 
+# Reverse Polish Notation Calculator
+### v. 1.1
 
-<div style="text-align: center;">
-    <h1>Reverse Polish Notation</h1>
-    <h3 style="font-weight: 700;">CLI program</h3>
-</div>
+&nbsp;
 
-<div>
-    <h2 style="margin-bottom: 15px;">Run from Linux terminal:</h2>
-    <pre>$ ./launch-rpn.sh</pre>
-    <h3 style="margin-top: 10px;">Once launched, type <code>help</code> to see a list of available commands.</h3>
-</div>
+### Run from Linux terminal:
+
+```bash
+$ ./launch-rpn.sh
+```
+Once launched, type `help` to see a list of available commands.
 
 &nbsp;
 
 ---
 
 <details>
-<summary>Reference(s):</summary>
+<summary>References (partial):</summary>
 <ul>
     <li><a href="https://leachlegacy.ece.gatech.edu/revpol/" target="_blank" style="color:#61a7c8;">Georgia Tech</a></li>
     <li><a href="https://docs.python.org/3.7/library/cmd.html" target="_blank" style="color:#61a7c8;">Python 3.7: Cmd</a></li>
