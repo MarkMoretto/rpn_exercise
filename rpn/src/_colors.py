@@ -2,10 +2,16 @@
 # -*- coding: utf-8 -*-
 
 """
-ANSI esC_ape C_ode C_olors
-See: https://en.wikipedia.org/wiki/ANSI_escape_code
+Description: ANSI esCape Code Color script.
 
-Main color codes and ranges:
+See: https://en.wikipedia.org/wiki/ANSI_escape_code
+See: https://en.wikipedia.org/wiki/C0_and_C1_control_codes
+See: https://en.wikipedia.org/wiki/Escape_character#ASCII_escape_character
+
+
+~*~ SGR (Select Graphic Rendition) parameters ~*~
+
+Base color codes:
     0 - black
     1 - red
     2 - green
@@ -14,12 +20,38 @@ Main color codes and ranges:
     5 - purple
     6 - beige
     7 - white
-    30-39 - foreground color
-    40-49 - backgrond color
+
+General pattern:
+    ESC[(a);(b);(c)m(d)ESC[0m
+
+Where -
+    ESC = ASCII escape character**
+        \033    - Octal
+        \x1b    - Hexadecimal
+        ^[      - Hexadecimal
+        27      - Decimal
+
+    
+    (a) = 0 - 7
+        Refers to special text attributes (e.g. - bold, italic).
+
+    (b) = 30 - 37
+        Set foreground color.
+
+    (c) = 40 - 47
+        Set background color.
+
+    (d) = Text to influence.
+
+** See: https://en.wikipedia.org/wiki/C0_and_C1_control_codes
 """
 
 class BColors:
-    C_END      = "\33[0m" # End statement
+    # End statement for color section
+    # Can be used in concert with the remaining options,
+    # but should not be used to start a sequence.
+    C_END      = "\33[0m"
+
     C_BOLD     = "\33[1m"
     C_ITALIC   = "\33[3m"
     C_URL      = "\33[4m"
@@ -74,38 +106,29 @@ class BColors:
 
 # txt = "Hello"
 # print(C_RED + txt + C_END)
-def print_format_table():
-    """prints table of formatted text format options
-    0 - black
-    1 - red
-    2 - green
-    3 - yellow
-    4 - blue
-    5 - purple
-    6 - beige
-    7 - white
-    30 + above == foreground color
-    40 + above = backgrond color
-
+def print_format_table() -> None:
+    """Prints table of formatted text format options
     print("\x1b[6;30;42mH\x1b[0m" + "elp")
     """
     for style in range(8):
-        for fg in range(30,38):
-            s1 = ''
-            for bg in range(40,48):
-                format = ';'.join([str(style), str(fg), str(bg)])
-                s1 += '\x1b[%sm %s \x1b[0m' % (format, format)
-            print(s1)
+        for fg in range(30, 38):
+            s = ""
+            for bg in range(40, 48):
+                output = ';'.join([str(style), str(fg), str(bg)])
+                s += f"\x1b[{output}m%{output}\x1b[0m"
+            print(s)
         print("\n")
-# print_format_table()
 
 
 def print_c_format_table():
+    """Same as print_format_table, but limited in scope.
+    """
     for i in range(11):
         for j in range(10):
             n = 10*i + j
             if n <= 108:
                 print(f"\033[{n}m {n:>3}\033[m", sep=" ", end = " ")
         print()
-# print_c_format_table()
 
+
+print("^[6;30;42mH^[0m" + "elp")

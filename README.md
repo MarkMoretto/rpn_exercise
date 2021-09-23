@@ -1,5 +1,4 @@
-# rpn_exercise
-Reverse Polish Notation CLI program.
+<h1>Reverse Polish Notation CLI program</h1>
 
 Run from Linux terminal:
 
