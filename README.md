@@ -1,28 +1,8 @@
-<style type="text/css">
-h1 {
-    margin:0px;
-}
-#header-section {
-    text-align: center;
-    margin-bottom: 15px;
-}
-#snippet {
-    font-family: monospace;
-    color: #68ea06;
-    font-size:1.2em;
-}
-pre {
-    color: #68ea06;
-    font-size:1.2rem;
-}
-code {
-    color: #f0ff00;
-}
-</style>
 
-<div id="header-section">
+
+<div style="text-align: center;">
     <h1>Reverse Polish Notation</h1>
-    <h3 style="font-weight:700;">CLI program</h3>
+    <h3 style="font-weight: 700;">CLI program</h3>
 </div>
 
 <div>
@@ -37,8 +17,9 @@ code {
 
 <details>
 <summary>Reference(s):</summary>
-<ul style="color:#68ea06;">
+<ul>
     <li><a href="https://leachlegacy.ece.gatech.edu/revpol/" target="_blank" style="color:#61a7c8;">Georgia Tech</a></li>
+    <li><a href="https://docs.python.org/3.7/library/cmd.html" target="_blank" style="color:#61a7c8;">Python 3.7: Cmd</a></li>
     <li><a href="https://en.wikipedia.org/wiki/ANSI_escape_code" target="_blank" style="color:#61a7c8;">ANSI escape code (Wikipedia)</a></li>
 </ul>
 </details>
