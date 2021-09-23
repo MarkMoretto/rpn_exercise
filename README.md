@@ -4,7 +4,7 @@
 
 &nbsp;
 
-### Run from Linux terminal:
+### Run from UNIX/Linux terminal:
 
 ```bash
 $ ./launch-rpn.sh

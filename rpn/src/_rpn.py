@@ -9,9 +9,8 @@ import re
 import math
 import inspect
 
-from _types import FloatList, Num
-from _exceptions import ValueCountError
-
+from src._types import FloatList, Num
+from src._exceptions import ValueCountError
 
 class OperatorsMixin:
     """Operators mixin.

@@ -1,13 +1,14 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-"""
-RPN Console Program
-Please run in Linux/UNIX bash.
-"""
+
+__all__ = [
+    "RpnShell",
+    ]
 
 import re
 import cmd
+
 
 from src._rpn import Rpn
 from src._types import StrList
@@ -27,6 +28,7 @@ PROMPT = "\x1b[0;36m~~> \x1b[0m"
 HEADER = "\n" + "\n".join(header_lines)
 
 
+
 def parse_arg(string: str) -> StrList:
     if not string is None and len(string) > 0:
         res = re.sub(r"[^0-9-\+/\*]+", "", string, flags = re.I)
@@ -43,10 +45,13 @@ class RpnShell(cmd.Cmd):
     def default(self, line) -> None:
         """Runs if no specific command is provided by the user.
         """
-        _tmp = parse_arg(line)
-        if len(_tmp) > 0:
-            for el in _tmp:
-                self.rpn.execute_next(el)
+        if line:
+            _tmp = parse_arg(line)
+            if len(_tmp) > 0:
+                for el in _tmp:
+                    self.rpn.execute_next(el)
+        else:
+            print("Please make sure to pass a numeric value or appropriate operator!\n")
 
     def emptyline(self, s):
         self.default(s)
@@ -103,7 +108,3 @@ class RpnShell(cmd.Cmd):
     def do_exit(self, arg):
         print("Goodbye!")
         exit(0)
-
-
-if __name__ == "__main__":
-    RpnShell().cmdloop()
