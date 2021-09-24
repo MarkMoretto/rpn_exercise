@@ -28,8 +28,12 @@ class Expression:
     cb_function : FuncReturnNum
         Callback function, or main expression to create.
     """
-    def __init__(self, alias_or_name: str, cb_function: FuncReturnNum):
-        self.alias = alias_or_name
+    def __init__(self, alias_or_name: str, cb_function: FuncReturnNum = None):
+        if len(alias_or_name) > 0:
+            self.alias = alias_or_name
+        else:
+            raise ValueError("Alias or name needs to be at least one character long.")
+
         self.function = cb_function
         self.__set_attrs()
 
@@ -127,7 +131,7 @@ class OperatorsMixin:
     NUMBERS = set(map(str, range(10)))
 
     def __init__(self) -> None:
-        self.description_cols = "Alias", "Args", "Function"
+        self.description_cols = "Oper", "Args", "Function"
         self.OPERATIONS.extend(self.OPERATIONS_EXT)
 
     def __update_ops(self):
