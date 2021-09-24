@@ -83,10 +83,6 @@ class RpnShell(cmd.Cmd):
 
     def emptyline(self):
         exit_program()
-        # if s:
-        #     self.default(s)
-        # else:
-        #     exit_program()
 
     # - BEGIN: RPN
     def do_calc(self, arg):
