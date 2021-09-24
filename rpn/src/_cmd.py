@@ -31,6 +31,11 @@ HEADER = "\n" + "\n".join(header_lines)
 RPN = Rpn()
 OPERATORS_ALL = RPN.NUMBERS.union(RPN.operators)
 
+
+def exit_program():
+    println(f"{linesep}Goodbye!")
+    exit(0)
+
 def parse_arg(string: str, opers: set = OPERATORS_ALL) -> StrList:
     """Returns list of characters from a string that are valid
     operators or numeric values.
@@ -66,6 +71,9 @@ class RpnShell(cmd.Cmd):
         """Runs if no specific command is provided by the user.
         """
         if line:
+            if line == "EOF":
+                exit_program()
+
             _tmp = parse_arg(line)
             if len(_tmp) > 0:
                 for el in _tmp:
@@ -73,8 +81,12 @@ class RpnShell(cmd.Cmd):
         else:
             println("Please make sure to pass a numeric value or appropriate operator!\n")
 
-    def emptyline(self, s):
-        self.default(s)
+    def emptyline(self):
+        exit_program()
+        # if s:
+        #     self.default(s)
+        # else:
+        #     exit_program()
 
     # - BEGIN: RPN
     def do_calc(self, arg):
@@ -128,6 +140,19 @@ class RpnShell(cmd.Cmd):
         """.strip().split(linesep)
         print(f"{linesep}".join(lines))       
 
+    # -/ END: RPN
+    def do_q(self, arg):
+        """Alias for `exit`
+        """
+        self.do_exit(arg)
+        
+    def do_exit(self, arg):
+        """Exit program with return code 0.
+        """
+        exit_program()
+
+
+
     #TODO: Implement ability to add expression.
     # def do_add_expr(self, arg):
     #     """Work in progress."""
@@ -153,17 +178,4 @@ class RpnShell(cmd.Cmd):
     #                 math
     #                 statistics
     #     """.strip().split("\n")
-    #     print("\n".join(lines)) 
-
-
-    # -/ END: RPN
-    def do_q(self, arg):
-        """Alias for `exit`
-        """
-        self.do_exit(arg)    
-        
-    def do_exit(self, arg):
-        """Exit program with return code 0.
-        """
-        println(f"{linesep}Goodbye!")
-        exit(0)
+    #     print("\n".join(lines))         
