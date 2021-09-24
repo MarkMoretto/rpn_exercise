@@ -145,10 +145,12 @@ class OperatorsMixin:
         """Use `deque` library to remove item
         from OPERATIONS list by the item's index.
         """
-        d = deque(self.OPERATIONS)
+        ops = self.OPERATIONS
+        d = deque(ops)
         d.rotate(-n)
         d.popleft()
         d.rotate(n)
+        self.OPERATIONS = list(d)
 
     def operation_index(self, lookup_value: str) -> int:
         """Return index related to lookup_value, which should be 
@@ -160,10 +162,10 @@ class OperatorsMixin:
     def add_expression(self, sig: str, fn: str) -> None:
         """Add new function to OPERATIONS.
         """
-        e = Expression(sig, eval(fn))
+        e = Expression(sig, fn)
         if not e.alias in self.operators:
             self.OPERATIONS.append(e)
-            self.__update_length_data()
+            self.set_length_data()
 
     def remove_expression(self, operator_alias: str) -> None:
         """Delete item from OPERATIONS collection by key.
@@ -249,11 +251,13 @@ class Rpn(OperatorsMixin):
         self.current_char = None
 
     @staticmethod
-    def is_int(obj: Num) -> bool:
+    def is_int(obj: str) -> bool:
         """Return True if value is int data type;
         False otherwise.
         """
-        return float(obj).is_integer()
+        if isinstance(obj, str):
+            return float(obj).is_integer()
+        raise ValueError("Integer or float numberic string value expected.")
 
     @property
     def remove_last(self) -> None:
@@ -292,7 +296,7 @@ class Rpn(OperatorsMixin):
             # Set result to final value if True.
             _result = self.stacker[-1]
 
-            if self.is_int(_result):
+            if self.is_int(f"{_result}"):
                 _result = int(_result)
 
         return _result
@@ -334,14 +338,12 @@ class Rpn(OperatorsMixin):
                 raise ValueCountError("Not enough values to perform operation.")
 
         elif new_char in self.NUMBERS:
-            try:
-                self.stacker.append(float(new_char))
-            except ValueError:
-                print(f"Error trying to convert {new_char}")
+            self.stacker.append(float(new_char))
+        
+        else:
+            # If a non-numeric or non-valid operator are passed, raise error.
+            raise ValueError("Values must be valid number or operator.")
 
-# rpn = Rpn()
-# rpn.descriptions()
-# rpn = Rpn.operators
 
 if __name__ == "__main__":
     import doctest

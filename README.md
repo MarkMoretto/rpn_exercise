@@ -13,6 +13,16 @@ Once launched, type `help` to see a list of available commands.
 
 &nbsp;
 
+## Tests
+
+To run unittests, from root folder and UNIX/Linux terminal, run:
+
+```bash
+$ ./run-tests.sh
+```
+
+&nbsp;
+
 ---
 
 <details>

@@ -73,12 +73,9 @@ class SGRColors:
     blue_lt         = "\x1b[94m"
 
 
-# def print_reds():
-#     for c in range(8):
-#         line = [f"\x1b[{i};3{i};4{i}m\x1b[0m" for i in range(8)]
-#         print(line)
-# print_reds()
-
+############################
+# - Color demo functions - #
+############################
 
 def print_format_table() -> None:
     """Prints table of formatted text format options
