@@ -2,21 +2,20 @@
 # -*- coding: utf-8 -*-
 
 __all__ = [
+    "Expression",
     "Rpn",
     ]
 
 import re
-import math
 import heapq
 import inspect
 from collections import deque
 
-from ._types import FloatList, FuncReturnNum, List, Num, TupIntHomo, TupStrHomo
-from ._exceptions import ValueCountError
+import math
+import statistics
 
-# From ./rpn/
-# from src._types import FloatList, FuncReturnNum, List, Num, TupIntHomo
-# from src._exceptions import ValueCountError
+from ._types import FloatList, FuncReturnNum, IntList, List, Num, TupIntHomo, TupStrHomo
+from ._exceptions import ValueCountError
 
 
 class Expression:
@@ -95,14 +94,8 @@ class Expression:
         TupStrHomo
             Tuple of homogeneous string type.
         """
-        return self.alias, self.signature, self.func_string        
+        return self.alias, self.signature, self.func_string 
 
-# e = Expression("+", lambda a, b: math.fsum([a, b]))
-# e = Expression("/", lambda a, b: b / a if a != 0 else math.inf)
-# aa = inspect.getsource(e.function).strip()
-# re.search(r".+:\s+?(.+)(?=\))", aa, flags = re.I).group(1)
-
-# inspect.getsource(e.function).strip().split(":")[1].strip()
 
 class OperatorsMixin:
     """Operators mixin.
@@ -135,10 +128,10 @@ class OperatorsMixin:
 
     def __init__(self) -> None:
         self.description_cols = "Alias", "Args", "Function"
-        self.__update_ops()
+        self.OPERATIONS.extend(self.OPERATIONS_EXT)
 
     def __update_ops(self):
-        self.OPERATIONS += self.OPERATIONS_EXT
+        self.OPERATIONS.extend(self.OPERATIONS_EXT)
 
     @property
     def operators(self):
@@ -160,11 +153,13 @@ class OperatorsMixin:
         _tmp  = (i for i, o in enumerate(self.OPERATIONS) if o.alias == lookup_value)
         return next(_tmp, -1)
 
-    def add_expression(self, e: Expression) -> None:
+    def add_expression(self, sig: str, fn: str) -> None:
         """Add new function to OPERATIONS.
         """
+        e = Expression(sig, eval(fn))
         if not e.alias in self.operators:
             self.OPERATIONS.append(e)
+            self.__update_length_data()
 
     def remove_expression(self, operator_alias: str) -> None:
         """Delete item from OPERATIONS collection by key.
@@ -173,29 +168,46 @@ class OperatorsMixin:
         if _idx > -1:
             self.del_nth(_idx)
 
+    def get_function(self, alias: str):
+        _idx = self.operation_index(alias)
+        if _idx > -1:
+            return 
 
-    def __update_length_data(self):
-        """Set a length map for description output.
+    def set_length_data(self, _padding = 1.5):
+        """Calculate padding amount for description columns.
+
+        Parameters
+        ----------
+        _padding : float
+            Amount of padding for each column.  Can be whole number or decimal.
+            Values at or over 100 will be reduced to decimal.
+
+        Returns
+        -------
+        IntList
+            List of integer values representing text padding for each column.
         """
-        self.max_len_list = [0] * 3
+        _max_len_list = [0] * 3
 
         for e in self.OPERATIONS:
             for i, length in enumerate(e.lengths):
-                if length > self.max_len_list[i]:
-                    self.max_len_list[i] = length
+                if length > _max_len_list[i]:
+                    _max_len_list[i] = length
 
         # Consider if column heading is wider than the max
         # width for a given column.
         for i, c in enumerate(self.description_cols):
-            if len(c) > self.max_len_list[i]:
-                self.max_len_list[i] = len(c)
+            if len(c) > _max_len_list[i]:
+                _max_len_list[i] = len(c)
+            
+        # Add padding to columns.
+        p = self.__norm_padding(_padding)
+        return [int(n * p) for n in _max_len_list]
         
-
-    def __pad_lengths(self, p):
-        """Calculate padding amount for description columns.
-        """
-        p = p if p > 1 else p / 100
-        self.max_len_list = [int(n * p) for n in self.max_len_list]
+    
+    def __norm_padding(self, p) -> float:
+        """Standardize padding to value between 0 and 100"""
+        return p if p < 100 else p / 100
 
     def descriptions(self, padding = 1.5):
         """Print out basic table of operators, signatures, and expressions.
@@ -205,15 +217,20 @@ class OperatorsMixin:
         padding : float
             Amount to pad columns by.  If 
         """
-        self.__update_length_data()
-        self.__pad_lengths(padding)
+        max_len_list = self.set_length_data(padding)
+
         _msg = []
-        _submsg = "".join([f"{c:<{l}}" for c, l in zip(self.description_cols, self.max_len_list)])
+        _submsg = "".join([f"{c:<{l}}" for c, l in zip(self.description_cols, max_len_list)])
         _msg.append(_submsg)
+        _msg.append("-" * sum(max_len_list))
 
         for expr in self.OPERATIONS:
-            _submsg = "".join([f"{e:<{L}}" for e, L in zip(expr.values, self.max_len_list)])
+            _submsg = "".join([f"{e:<{L}}" for e, L in zip(expr.values, max_len_list)])
             _msg.append(_submsg)
+
+        # Little room for easier reading on prompt.
+        _msg.insert(0, "")
+        _msg.append("")
 
         print("\n".join(_msg))
 
@@ -288,20 +305,28 @@ class Rpn(OperatorsMixin):
         Returns
         -------
         None
+
         """
-        
+        _idx = self.operation_index(new_char)
+
         # Character found in valid operator set.
-        if new_char in self.OPERATIONS:
+        if new_char in self.operators:
             if len(self.stacker) > 1:
                 # Expressions with two parameters.
-                self.stacker.append(self.OPERATIONS[new_char](self.stacker.pop(), self.stacker.pop()))
+                self.stacker.append(self.OPERATIONS[_idx].function(self.stacker.pop(), self.stacker.pop()))
 
+            # If there is only one value in the stack.
             elif len(self.stacker) == 1:
-                # Expressions with one parameter.
+                # See if new_char in single-arg operations collection and run.
                 if new_char in self.OPERATIONS_EXT:
-                    self.stacker.append(self.OPERATIONS[new_char](self.stacker.pop()))
-    
+                    self.stacker.append(self.OPERATIONS[_idx].function(self.stacker.pop()))
+                else:
+                    # If the selected next operator requires 
+                    raise ValueCountError("Operation requires at least one numeric value.")
+
             else:
+                # If new_char is an operator, but there are not enough values
+                # to execute the expression, then raise an error.
                 raise ValueCountError("Not enough values to perform operation.")
 
         elif new_char in self.NUMBERS:
@@ -309,3 +334,11 @@ class Rpn(OperatorsMixin):
                 self.stacker.append(float(new_char))
             except ValueError:
                 print(f"Error trying to convert {new_char}")
+
+# rpn = Rpn()
+# rpn.descriptions()
+# rpn = Rpn.operators
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
