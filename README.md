@@ -4,18 +4,27 @@
 
 &nbsp;
 
-### Run from UNIX/Linux terminal:
+## How-To:
+
+From UNIX/Linux terminal - 
+
+1. Clone repo to local drive
+2. `cd` into `rpn_exercise`
+3. Run the following from the command line:
 
 ```bash
 $ ./launch-rpn.sh
 ```
-Once launched, type `help` to see a list of available commands.
+
+Once launched, you can type `help` to see a list of available commands.  Typing `help [command]` will bring up more information.
+
+To quit the program, type `q` or `exit`.
 
 &nbsp;
 
-## Tests
+## Testing
 
-To run unittests, from root folder and UNIX/Linux terminal, run:
+To run unittests, from the root folder in your cloned instance, run:
 
 ```bash
 $ ./run-tests.sh
