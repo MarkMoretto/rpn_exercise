@@ -46,56 +46,31 @@ Where -
 ** See: https://en.wikipedia.org/wiki/C0_and_C1_control_codes
 """
 
-class BColors:
+class SGRColors:
     # End statement for color section
     # Can be used in concert with the remaining options,
-    # but should not be used to start a sequence.
-    C_END      = "\33[0m"
+    # but should not be used to start a sequence.    
+    end             = "\x1b[0m"
 
-    C_BOLD     = "\33[1m"
-    C_ITALIC   = "\33[3m"
-    C_URL      = "\33[4m"
-    C_BLINK    = "\33[5m"
-    C_BLINK2   = "\33[6m"
-    C_SELECTED = "\33[7m"
+    purple          = "\x1b[35m"
+    purple_lt       = "\x1b[95m"
+    purp_lt_blink   = "\x1b[6;95m"
 
-    C_BLACK  = "\33[30m"
-    C_RED    = "\33[31m"
-    C_GREEN  = "\33[32m"
-    C_YELLOW = "\33[33m"
-    C_BLUE   = "\33[34m"
-    C_VIOLET = "\33[35m"
-    C_BEIGE  = "\33[36m"
-    C_WHITE  = "\33[37m"
+    yellow          = "\x1b[33m"
+    yel_blink       = "\x1b[6;33m"
 
-    C_BLACKBG  = "\33[40m"
-    C_REDBG    = "\33[41m"
-    C_GREENBG  = "\33[42m"
-    C_YELLOWBG = "\33[43m"
-    C_BLUEBG   = "\33[44m"
-    C_VIOLETBG = "\33[45m"
-    C_BEIGEBG  = "\33[46m"
-    C_WHITEBG  = "\33[47m"
+    cyan            = "\x1b[36m"
+    cyan_blink      = "\x1b[6;36m"
 
-    C_GREY    = "\33[90m"
-    C_RED2    = "\33[91m"
-    C_GREEN2  = "\33[92m"
-    C_YELLOW2 = "\33[93m"
-    C_BLUE2   = "\33[94m"
-    C_VIOLET2 = "\33[95m"
-    C_BEIGE2  = "\33[96m"
-    C_WHITE2  = "\33[97m"
+    cyan_lt         = "\x1b[96m"
+    cyan_lt_blink   = "\x1b[6;96m"
 
-    C_GREYBG    = "\33[100m"
-    C_REDBG2    = "\33[101m"
-    C_GREENBG2  = "\33[102m"
-    C_YELLOWBG2 = "\33[103m"
-    C_BLUEBG2   = "\33[104m"
-    C_VIOLETBG2 = "\33[105m"
-    C_BEIGEBG2  = "\33[106m"
-    C_WHITEBG2  = "\33[107m"
+    red             = "\x1b[31m"
+    red_lt          = "\x1b[1;31m"
+    red_blink       = "\x1b[6;31m"
 
-
+    blue            = "\x1b[34m"
+    blue_lt         = "\x1b[94m"
 
 
 # def print_reds():
@@ -104,8 +79,7 @@ class BColors:
 #         print(line)
 # print_reds()
 
-# txt = "Hello"
-# print(C_RED + txt + C_END)
+
 def print_format_table() -> None:
     """Prints table of formatted text format options
     print("\x1b[6;30;42mH\x1b[0m" + "elp")
@@ -131,4 +105,3 @@ def print_c_format_table():
         print()
 
 
-print("^[6;30;42mH^[0m" + "elp")

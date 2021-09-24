@@ -12,19 +12,20 @@ from os import linesep
 
 from ._rpn import Expression, Rpn
 from ._types import StrList
-
+from ._colors import SGRColors as C
 
 # - Header and prompt formatting.
 header_lines = [
-    "\x1b[1;35mWelcome to the Reverse Polish Notation Calculator!\x1b[0m",
+    f"{C.purple_lt}Welcome to the Reverse Polish Notation Calculator!{C.end}",
     "",
-    "\x1b[6;33m***\x1b[0m \x1b[0;33mDe-luxe\x1b[0m \x1b[6;33m***\x1b[0m",
+    f"{C.yel_blink}***{C.end} {C.yellow}De-luxe{C.end} {C.yel_blink}***{C.end}",
     "",
-    "\x1b[0;33;40mType\x1b[0m \x1b[1;96mhelp\x1b[0m \x1b[0;33;40mfor list of available options.\x1b[0m",
+    f"{C.yellow}Type{C.end} {C.cyan_lt}help{C.end} {C.yellow}for list of available options.{C.end}",
+    f"{C.yellow}Press{C.end} {C.blue_lt}q{C.end} {C.yellow}or{C.end} {C.blue_lt}exit{C.end} {C.yellow}to exit program.{C.end}",
     "",
-    ]
+    ]    
 
-PROMPT = "\x1b[0;36m~~> \x1b[0m"
+PROMPT = f"{C.cyan}~~> {C.end}"
 HEADER = "\n" + "\n".join(header_lines)
 
 RPN = Rpn()
@@ -127,6 +128,7 @@ class RpnShell(cmd.Cmd):
         """.strip().split(linesep)
         print(f"{linesep}".join(lines))       
 
+    #TODO: Implement ability to add expression.
     # def do_add_expr(self, arg):
     #     """Work in progress."""
         # gcd lambda a, b: mathgcd(b, a)
