@@ -1,0 +1,174 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module _colors</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>_colors</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/mnt/c/Users/Work1/desktop/info/resume/projects/rpn_exercise/rpn/src/_colors.py">/mnt/c/Users/Work1/desktop/info/resume/projects/rpn_exercise/rpn/src/_colors.py</a></font></td></tr></table>
+    <p><tt>Description:&nbsp;ANSI&nbsp;esCape&nbsp;Code&nbsp;Color&nbsp;script.<br>
+&nbsp;<br>
+See:&nbsp;https://en.wikipedia.org/wiki/ANSI_escape_code<br>
+See:&nbsp;https://en.wikipedia.org/wiki/C0_and_C1_control_codes<br>
+See:&nbsp;https://en.wikipedia.org/wiki/Escape_character#ASCII_escape_character<br>
+&nbsp;<br>
+&nbsp;<br>
+~*~&nbsp;SGR&nbsp;(Select&nbsp;Graphic&nbsp;Rendition)&nbsp;parameters&nbsp;~*~<br>
+&nbsp;<br>
+Base&nbsp;color&nbsp;codes:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;-&nbsp;black<br>
+&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;-&nbsp;red<br>
+&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;-&nbsp;green<br>
+&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;-&nbsp;yellow<br>
+&nbsp;&nbsp;&nbsp;&nbsp;4&nbsp;-&nbsp;blue<br>
+&nbsp;&nbsp;&nbsp;&nbsp;5&nbsp;-&nbsp;purple<br>
+&nbsp;&nbsp;&nbsp;&nbsp;6&nbsp;-&nbsp;beige<br>
+&nbsp;&nbsp;&nbsp;&nbsp;7&nbsp;-&nbsp;white<br>
+&nbsp;<br>
+General&nbsp;pattern:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ESC[(a);(b);(c)m(d)ESC[0m<br>
+&nbsp;<br>
+Where&nbsp;-<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ESC&nbsp;=&nbsp;ASCII&nbsp;escape&nbsp;character**<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Octal<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Hexadecimal<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;^[&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Hexadecimal<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;27&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Decimal<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(a)&nbsp;=&nbsp;0&nbsp;-&nbsp;7<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Refers&nbsp;to&nbsp;special&nbsp;text&nbsp;attributes&nbsp;(e.g.&nbsp;-&nbsp;bold,&nbsp;italic).<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(b)&nbsp;=&nbsp;30&nbsp;-&nbsp;37<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Set&nbsp;foreground&nbsp;color.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(c)&nbsp;=&nbsp;40&nbsp;-&nbsp;47<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Set&nbsp;background&nbsp;color.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(d)&nbsp;=&nbsp;Text&nbsp;to&nbsp;influence.<br>
+&nbsp;<br>
+**&nbsp;See:&nbsp;https://en.wikipedia.org/wiki/C0_and_C1_control_codes</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="builtins.html#object">builtins.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="_colors.html#BColors">BColors</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="BColors">class <strong>BColors</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>C_BEIGE</strong> = '<font color="#c040c0">\x1b</font>[36m'</dl>
+
+<dl><dt><strong>C_BEIGE2</strong> = '<font color="#c040c0">\x1b</font>[96m'</dl>
+
+<dl><dt><strong>C_BEIGEBG</strong> = '<font color="#c040c0">\x1b</font>[46m'</dl>
+
+<dl><dt><strong>C_BEIGEBG2</strong> = '<font color="#c040c0">\x1b</font>[106m'</dl>
+
+<dl><dt><strong>C_BLACK</strong> = '<font color="#c040c0">\x1b</font>[30m'</dl>
+
+<dl><dt><strong>C_BLACKBG</strong> = '<font color="#c040c0">\x1b</font>[40m'</dl>
+
+<dl><dt><strong>C_BLINK</strong> = '<font color="#c040c0">\x1b</font>[5m'</dl>
+
+<dl><dt><strong>C_BLINK2</strong> = '<font color="#c040c0">\x1b</font>[6m'</dl>
+
+<dl><dt><strong>C_BLUE</strong> = '<font color="#c040c0">\x1b</font>[34m'</dl>
+
+<dl><dt><strong>C_BLUE2</strong> = '<font color="#c040c0">\x1b</font>[94m'</dl>
+
+<dl><dt><strong>C_BLUEBG</strong> = '<font color="#c040c0">\x1b</font>[44m'</dl>
+
+<dl><dt><strong>C_BLUEBG2</strong> = '<font color="#c040c0">\x1b</font>[104m'</dl>
+
+<dl><dt><strong>C_BOLD</strong> = '<font color="#c040c0">\x1b</font>[1m'</dl>
+
+<dl><dt><strong>C_END</strong> = '<font color="#c040c0">\x1b</font>[0m'</dl>
+
+<dl><dt><strong>C_GREEN</strong> = '<font color="#c040c0">\x1b</font>[32m'</dl>
+
+<dl><dt><strong>C_GREEN2</strong> = '<font color="#c040c0">\x1b</font>[92m'</dl>
+
+<dl><dt><strong>C_GREENBG</strong> = '<font color="#c040c0">\x1b</font>[42m'</dl>
+
+<dl><dt><strong>C_GREENBG2</strong> = '<font color="#c040c0">\x1b</font>[102m'</dl>
+
+<dl><dt><strong>C_GREY</strong> = '<font color="#c040c0">\x1b</font>[90m'</dl>
+
+<dl><dt><strong>C_GREYBG</strong> = '<font color="#c040c0">\x1b</font>[100m'</dl>
+
+<dl><dt><strong>C_ITALIC</strong> = '<font color="#c040c0">\x1b</font>[3m'</dl>
+
+<dl><dt><strong>C_RED</strong> = '<font color="#c040c0">\x1b</font>[31m'</dl>
+
+<dl><dt><strong>C_RED2</strong> = '<font color="#c040c0">\x1b</font>[91m'</dl>
+
+<dl><dt><strong>C_REDBG</strong> = '<font color="#c040c0">\x1b</font>[41m'</dl>
+
+<dl><dt><strong>C_REDBG2</strong> = '<font color="#c040c0">\x1b</font>[101m'</dl>
+
+<dl><dt><strong>C_SELECTED</strong> = '<font color="#c040c0">\x1b</font>[7m'</dl>
+
+<dl><dt><strong>C_URL</strong> = '<font color="#c040c0">\x1b</font>[4m'</dl>
+
+<dl><dt><strong>C_VIOLET</strong> = '<font color="#c040c0">\x1b</font>[35m'</dl>
+
+<dl><dt><strong>C_VIOLET2</strong> = '<font color="#c040c0">\x1b</font>[95m'</dl>
+
+<dl><dt><strong>C_VIOLETBG</strong> = '<font color="#c040c0">\x1b</font>[45m'</dl>
+
+<dl><dt><strong>C_VIOLETBG2</strong> = '<font color="#c040c0">\x1b</font>[105m'</dl>
+
+<dl><dt><strong>C_WHITE</strong> = '<font color="#c040c0">\x1b</font>[37m'</dl>
+
+<dl><dt><strong>C_WHITE2</strong> = '<font color="#c040c0">\x1b</font>[97m'</dl>
+
+<dl><dt><strong>C_WHITEBG</strong> = '<font color="#c040c0">\x1b</font>[47m'</dl>
+
+<dl><dt><strong>C_WHITEBG2</strong> = '<font color="#c040c0">\x1b</font>[107m'</dl>
+
+<dl><dt><strong>C_YELLOW</strong> = '<font color="#c040c0">\x1b</font>[33m'</dl>
+
+<dl><dt><strong>C_YELLOW2</strong> = '<font color="#c040c0">\x1b</font>[93m'</dl>
+
+<dl><dt><strong>C_YELLOWBG</strong> = '<font color="#c040c0">\x1b</font>[43m'</dl>
+
+<dl><dt><strong>C_YELLOWBG2</strong> = '<font color="#c040c0">\x1b</font>[103m'</dl>
+
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-print_c_format_table"><strong>print_c_format_table</strong></a>()</dt><dd><tt>Same&nbsp;as&nbsp;print_format_table,&nbsp;but&nbsp;limited&nbsp;in&nbsp;scope.</tt></dd></dl>
+ <dl><dt><a name="-print_format_table"><strong>print_format_table</strong></a>() -&gt; None</dt><dd><tt>Prints&nbsp;table&nbsp;of&nbsp;formatted&nbsp;text&nbsp;format&nbsp;options<br>
+print("[6;30;42mH[0m"&nbsp;+&nbsp;"elp")</tt></dd></dl>
+</td></tr></table>
+</body></html>
