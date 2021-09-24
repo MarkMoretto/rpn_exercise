@@ -132,4 +132,4 @@ dmypy.json
 # Locals
 dev[_-]*.*
 .vscode
-rpn/docs
+**/docs/
