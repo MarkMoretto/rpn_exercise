@@ -96,6 +96,8 @@ class RpnShell(cmd.Cmd):
         lines = "$ del", "Remove the last statement from the RPN stack."
         print("\n".join(lines))
 
+    def do_operators(self, arg):
+        self.rpn.descriptions()
 
     def do_add_expr(self, arg):
         """Placeholder for capability to add new expression

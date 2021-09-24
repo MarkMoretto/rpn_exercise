@@ -20,6 +20,7 @@ StrList = List[str]
 
 # Tuples
 TupIntHomo = Tuple[int, ...]
+TupStrHomo = Tuple[str, ...]
 
 # Callables
 FuncReturnNum = Callable[..., Num]

@@ -11,36 +11,98 @@ import heapq
 import inspect
 from collections import deque
 
-from ._types import FloatList, FuncReturnNum, List, Num, TupIntHomo
+from ._types import FloatList, FuncReturnNum, List, Num, TupIntHomo, TupStrHomo
 from ._exceptions import ValueCountError
+
+# From ./rpn/
+# from src._types import FloatList, FuncReturnNum, List, Num, TupIntHomo
+# from src._exceptions import ValueCountError
 
 
 class Expression:
+    """Expression class. Handles single mathematical expression.
+    
+    Parameters
+    ----------
+    alias_or_name : str
+        Math operator or alias of expression to create.
+    cb_function : FuncReturnNum
+        Callback function, or main expression to create.
+    """
     def __init__(self, alias_or_name: str, cb_function: FuncReturnNum):
         self.alias = alias_or_name
         self.function = cb_function
         self.__set_attrs()
 
-    def __set_lengths(self):
+    def __set_lengths(self) -> None:
+        """Set length attributes for a given expression instance.
+        """
         self.len_alias = len(self.alias)
         self.len_func = len(self.func_string)
         self.len_sig = len(self.signature)        
 
-    def __set_attrs(self):
+    def __set_attrs(self) -> None:
+        """Process and set attributes for a given expression instance.
+        """
         self.signature = str(inspect.signature(self.function))
         self.func_string = self.process_function(self.function)
         self.__set_lengths()
 
     @staticmethod
     def process_function(fn: FuncReturnNum) -> str:
-        return inspect.getsource(fn).strip().split(":")[1].strip()
+        """Static method to process function expression.
+
+        Parameters
+        ----------
+        fn : FuncReturnNum
+            Function with numeric return value.
+        
+        Returns
+        -------
+        str
+            String value of the processed function.
+        """
+        aa = inspect.getsource(fn).strip()
+        _res = re.search(r".+:\s+?(.+)(?=\))", aa, flags = re.I)
+        if _res:
+            return _res.group(1)
     
     @property
     def lengths(self) -> TupIntHomo:
-        """Return tuple containing length attributes.
+        """Lengths propery for given Expression instance.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        TupIntHomo
+            Tuple of homogeneous integer type.
         """
         return self.len_alias, self.len_sig, self.len_func
 
+    @property
+    def values(self) -> TupStrHomo:
+        """Return key attribute values for given Expression instance.
+    
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        TupStrHomo
+            Tuple of homogeneous string type.
+        """
+        return self.alias, self.signature, self.func_string        
+
+# e = Expression("+", lambda a, b: math.fsum([a, b]))
+# e = Expression("/", lambda a, b: b / a if a != 0 else math.inf)
+# aa = inspect.getsource(e.function).strip()
+# re.search(r".+:\s+?(.+)(?=\))", aa, flags = re.I).group(1)
+
+# inspect.getsource(e.function).strip().split(":")[1].strip()
 
 class OperatorsMixin:
     """Operators mixin.
@@ -127,16 +189,34 @@ class OperatorsMixin:
         for i, c in enumerate(self.description_cols):
             if len(c) > self.max_len_list[i]:
                 self.max_len_list[i] = len(c)
+        
 
+    def __pad_lengths(self, p):
+        """Calculate padding amount for description columns.
+        """
+        p = p if p > 1 else p / 100
+        self.max_len_list = [int(n * p) for n in self.max_len_list]
 
-    def descriptions(self):
+    def descriptions(self, padding = 1.5):
+        """Print out basic table of operators, signatures, and expressions.
+        
+        Parameters
+        ----------
+        padding : float
+            Amount to pad columns by.  If 
+        """
         self.__update_length_data()
-        _msg = [f"{c:^{l}}" for c, l in zip(self.description_cols, self.max_len_list)]
+        self.__pad_lengths(padding)
+        _msg = []
+        _submsg = "".join([f"{c:<{l}}" for c, l in zip(self.description_cols, self.max_len_list)])
+        _msg.append(_submsg)
 
         for expr in self.OPERATIONS:
-            _msg += [f"{e:^{L}}" for e, L in zip([expr.lengths], self.max_len_list)]
+            _submsg = "".join([f"{e:<{L}}" for e, L in zip(expr.values, self.max_len_list)])
+            _msg.append(_submsg)
 
         print("\n".join(_msg))
+
 
 
 class Rpn(OperatorsMixin):
