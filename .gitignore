@@ -132,3 +132,4 @@ dmypy.json
 # Locals
 dev[_-]*.*
 .vscode
+/docs/
