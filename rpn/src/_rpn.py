@@ -7,10 +7,40 @@ __all__ = [
 
 import re
 import math
+import heapq
 import inspect
+from collections import deque
 
-from src._types import FloatList, Num
-from src._exceptions import ValueCountError
+from ._types import FloatList, FuncReturnNum, List, Num, TupIntHomo
+from ._exceptions import ValueCountError
+
+
+class Expression:
+    def __init__(self, alias_or_name: str, cb_function: FuncReturnNum):
+        self.alias = alias_or_name
+        self.function = cb_function
+        self.__set_attrs()
+
+    def __set_lengths(self):
+        self.len_alias = len(self.alias)
+        self.len_func = len(self.func_string)
+        self.len_sig = len(self.signature)        
+
+    def __set_attrs(self):
+        self.signature = str(inspect.signature(self.function))
+        self.func_string = self.process_function(self.function)
+        self.__set_lengths()
+
+    @staticmethod
+    def process_function(fn: FuncReturnNum) -> str:
+        return inspect.getsource(fn).strip().split(":")[1].strip()
+    
+    @property
+    def lengths(self) -> TupIntHomo:
+        """Return tuple containing length attributes.
+        """
+        return self.len_alias, self.len_sig, self.len_func
+
 
 class OperatorsMixin:
     """Operators mixin.
@@ -22,61 +52,91 @@ class OperatorsMixin:
     CAPTURE_FUNC_REGEX: str = r"(?:.+:)\s*(.+),"
 
     # Operations with two parameters.
-    OPERATIONS = {
-        "+": lambda a, b: math.fsum([a, b]),
-        "-": lambda a, b: b - a,
-        "*": lambda a, b: b * a,
-        "/": lambda a, b: b / a if a != 0 else math.inf, # Zero-division
-        "^": lambda a, b: math.pow(b, a),
-        "log": lambda n, base: math.log(n, base),
-    }
+    OPERATIONS = [
+        Expression("+", lambda a, b: math.fsum([a, b])),
+        Expression("-", lambda a, b: b - a),
+        Expression("*", lambda a, b: b * a),
+        Expression("/", lambda a, b: b / a if a != 0 else math.inf),
+        Expression("^", lambda a, b: math.pow(b, a)),     
+    ]
 
-    # Infrequent operations with single parameter.
-    OPERATIONS_EXT = {
-        "sin": lambda n: math.sin(n),
-        "cos": lambda n: math.cos(n),
-        "tanh": lambda n: math.tan(n),            
-        "acos": lambda n: math.acos(n),
-        "e": lambda n: math.exp(n),
-    }
+    OPERATIONS_EXT = [
+        Expression("log", lambda n, base: math.log(n, base)),
+        Expression("sin", lambda n: math.sin(n)),
+        Expression("cos", lambda n: math.cos(n)),
+        Expression("tanh", lambda n: math.tan(n)),
+        Expression("acos", lambda n: math.acos(n)),
+        Expression("e", lambda n: math.exp(n)),
+    ]
+
+    NUMBERS = set(map(str, range(10)))
 
     def __init__(self) -> None:
-        # Update OPERATIONS dict with extended operations.
-        self.OPERATIONS.update(**self.OPERATIONS_EXT)        
-        self.NUMBERS = None
-        self.OPERATORS = None
+        self.description_cols = "Alias", "Args", "Function"
         self.__update_ops()
 
-    def __update_ops(self) -> None:
-        """Update OPERATORS data set with the numeric values 0 - 9.
+    def __update_ops(self):
+        self.OPERATIONS += self.OPERATIONS_EXT
+
+    @property
+    def operators(self):
+        return set([o.alias for o in self.OPERATIONS])
+
+    def del_nth(self, n):
+        """Use `deque` library to remove item
+        from OPERATIONS list by the item's index.
         """
-        self.NUMBERS = set(map(str, range(0, 10)))
-        self.OPERATORS = set(self.OPERATIONS.keys())
-        self.OPERATORS.update(self.NUMBERS)
+        d = deque(self.OPERATIONS)
+        d.rotate(-n)
+        d.popleft()
+        d.rotate(n)
 
-    def add_func(self, function_name, function_object) -> None:
-        """Add new function to OPERATIONS."""
-        if not function_name in self.OPERATIONS:
-            self.OPERATIONS[function_name] = function_object
-            self.__update_ops()
+    def operation_index(self, lookup_value: str) -> int:
+        """Return index related to lookup_value, which should be 
+        an operator "sign" or alias.
+        """
+        _tmp  = (i for i, o in enumerate(self.OPERATIONS) if o.alias == lookup_value)
+        return next(_tmp, -1)
 
-    def remove_func(self, function_name) -> None:
-        """Delete item from OPERATIONS collection by key."""
-        try:
-            del self.OPERATIONS[function_name]
-            self.__update_ops()
-        except ValueError:
-            pass
+    def add_expression(self, e: Expression) -> None:
+        """Add new function to OPERATIONS.
+        """
+        if not e.alias in self.operators:
+            self.OPERATIONS.append(e)
+
+    def remove_expression(self, operator_alias: str) -> None:
+        """Delete item from OPERATIONS collection by key.
+        """
+        _idx = self.operation_index(operator_alias)
+        if _idx > -1:
+            self.del_nth(_idx)
+
+
+    def __update_length_data(self):
+        """Set a length map for description output.
+        """
+        self.max_len_list = [0] * 3
+
+        for e in self.OPERATIONS:
+            for i, length in enumerate(e.lengths):
+                if length > self.max_len_list[i]:
+                    self.max_len_list[i] = length
+
+        # Consider if column heading is wider than the max
+        # width for a given column.
+        for i, c in enumerate(self.description_cols):
+            if len(c) > self.max_len_list[i]:
+                self.max_len_list[i] = len(c)
+
 
     def descriptions(self):
-        self.__update_ops()
-        print("Alias\tArgs\t\tFunction")
-        for k, fn in self.OPERATIONS.items():
-            _sig = inspect.signature(fn)
-            _fn = inspect.getsource(fn).strip().split(":")[2].strip()
-            print(f"{k}\t{_sig}\t\t{_fn}")
+        self.__update_length_data()
+        _msg = [f"{c:^{l}}" for c, l in zip(self.description_cols, self.max_len_list)]
 
+        for expr in self.OPERATIONS:
+            _msg += [f"{e:^{L}}" for e, L in zip([expr.lengths], self.max_len_list)]
 
+        print("\n".join(_msg))
 
 
 class Rpn(OperatorsMixin):

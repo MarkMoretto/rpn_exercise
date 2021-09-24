@@ -10,8 +10,8 @@ import re
 import cmd
 
 
-from src._rpn import Rpn
-from src._types import StrList
+from ._rpn import Rpn
+from ._types import StrList
 
 
 # - Header and prompt formatting.
