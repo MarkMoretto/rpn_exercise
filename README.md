@@ -4,6 +4,20 @@
 
 &nbsp;
 
+## Description -
+
+This is an interactive command line program for users to calculate a Reverse Polish Notation expression.
+
+&nbsp;
+
+## Reasoning -
+
+This initially started off as a Python [curses](https://docs.python.org/3/library/curses.html) program, but some of the quirks associated with the library began to add up.  (Norally, I develop things on a Windows platform, so shifting over to development/testing with Linux was interesting.)
+
+Due to some challenges with the [curses](https://docs.python.org/3/library/curses.html)  library, the initial program was put on the backburner and the one that you'll be using was developed using the [cmd](https://docs.python.org/3/library/cmd.html) standard library for Python.
+
+&nbsp;
+
 ## How-To:
 
 From UNIX/Linux terminal - 
@@ -31,6 +45,18 @@ $ ./run-tests.sh
 ```
 
 &nbsp;
+
+## Documentation
+
+There's also the ability to view pydoc documentation.  From your bash terminal, run the following:
+
+```bash
+$ ./view-docs.sh
+```
+
+This will genrate documentation into the ./rpn/docs folder and start a simple server for the local address: [http://127.0.0.1:9876](http://127.0.0.1:9876)
+
+Users are more than welcome to change that port number or anything else they'd like to about the server.
 
 ---
 

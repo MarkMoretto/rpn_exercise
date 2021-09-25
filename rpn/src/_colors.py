@@ -57,6 +57,7 @@ class SGRColors:
     purp_lt_blink   = "\x1b[6;95m"
 
     yellow          = "\x1b[33m"
+    yellow_lt       = "\x1b[93m"    
     yel_blink       = "\x1b[6;33m"
 
     cyan            = "\x1b[36m"
@@ -68,6 +69,10 @@ class SGRColors:
     red             = "\x1b[31m"
     red_lt          = "\x1b[1;31m"
     red_blink       = "\x1b[6;31m"
+
+    green           = "\x1b[32m"
+    green_lt        = "\x1b[92m"    
+    grn_blink       = "\x1b[6;32m"
 
     blue            = "\x1b[34m"
     blue_lt         = "\x1b[94m"

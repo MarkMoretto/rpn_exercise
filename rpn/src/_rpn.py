@@ -14,7 +14,15 @@ from collections import deque
 import math
 import statistics
 
-from ._types import FloatList, FuncReturnNum, IntList, List, Num, TupIntHomo, TupStrHomo
+from ._types import (
+    FloatList,
+    FuncReturnNum,
+    IntList,
+    List, 
+    Num,
+    TupIntHomo,
+    TupStrHomo,
+    )
 from ._exceptions import ValueCountError
 
 
@@ -128,7 +136,7 @@ class OperatorsMixin:
         Expression("e", lambda n: math.exp(n)),
     ]
 
-    NUMBERS = set(map(str, range(10)))
+    NUMBERS = set(map(str, range(10))).union(set(map(str, [i*-1 for i in range(1, 10)])))
 
     def __init__(self) -> None:
         self.description_cols = "Oper", "Args", "Function"
@@ -155,12 +163,20 @@ class OperatorsMixin:
     def operation_index(self, lookup_value: str) -> int:
         """Return index related to lookup_value, which should be 
         an operator "sign" or alias.
+
+        Returns
+        -------
+        int      
         """
         _tmp  = (i for i, o in enumerate(self.OPERATIONS) if o.alias == lookup_value)
         return next(_tmp, -1)
 
     def add_expression(self, sig: str, fn: str) -> None:
         """Add new function to OPERATIONS.
+
+        Returns
+        -------
+        None        
         """
         e = Expression(sig, fn)
         if not e.alias in self.operators:
@@ -169,6 +185,10 @@ class OperatorsMixin:
 
     def remove_expression(self, operator_alias: str) -> None:
         """Delete item from OPERATIONS collection by key.
+
+        Returns
+        -------
+        None        
         """
         _idx = self.operation_index(operator_alias)
         if _idx > -1:
@@ -212,16 +232,28 @@ class OperatorsMixin:
         
     
     def __norm_padding(self, p) -> float:
-        """Standardize padding to value between 0 and 100"""
-        return p if p < 100 else p / 100
+        """Standardize padding to value between 0 and 100.
 
-    def descriptions(self, padding = 1.5):
+        Returns
+        -------
+        float
+            Adjusted numeric value as calculated percent.        
+        """
+        return p if p < 10.0 else p / 100
+
+
+    def descriptions(self, padding = 1.5) -> None:
         """Print out basic table of operators, signatures, and expressions.
         
         Parameters
         ----------
         padding : float
-            Amount to pad columns by.  If 
+            Amount to pad columns by.  If greater than or equal to 10.0, will 
+            divide by 100.
+
+        Returns
+        -------
+        None            
         """
         max_len_list = self.set_length_data(padding)
 
@@ -254,6 +286,10 @@ class Rpn(OperatorsMixin):
     def is_int(obj: str) -> bool:
         """Return True if value is int data type;
         False otherwise.
+
+        Returns
+        -------
+        bool        
         """
         if isinstance(obj, str):
             return float(obj).is_integer()
@@ -263,6 +299,10 @@ class Rpn(OperatorsMixin):
     def remove_last(self) -> None:
         """Remove last item added to stack.  Like .pop()
         without all the "return value" hype.
+
+        Returns
+        -------
+        None        
         """
         if len(self.stacker) > 0:
             self.stacker = self.stacker[:-1]
@@ -270,18 +310,31 @@ class Rpn(OperatorsMixin):
     @property
     def reset(self) -> None:
         """Reset stack. AGNB.
+
+        Returns
+        -------
+        None        
         """
         self.stacker = []
 
     @property
     def status(self) -> FloatList:
         """Return current stack, empty or otherwise.
+
+        Returns
+        -------
+        FloatList
+            List of floating-point numeric values.        
         """
         return self.stacker
     
     @property
     def result(self) -> Num:
         """Return result of RPN calculation(s).
+
+        Parameters
+        ----------
+        None
 
         Returns
         -------
@@ -317,6 +370,8 @@ class Rpn(OperatorsMixin):
         """
         _idx = self.operation_index(new_char)
 
+        #TODO: Update for any digit, not just single digits.
+
         # Character found in valid operator set.
         if new_char in self.operators:
             if len(self.stacker) > 1:
@@ -328,6 +383,7 @@ class Rpn(OperatorsMixin):
                 # See if new_char in single-arg operations collection and run.
                 if new_char in self.OPERATIONS_EXT:
                     self.stacker.append(self.OPERATIONS[_idx].function(self.stacker.pop()))
+
                 else:
                     # If the selected next operator requires 
                     raise ValueCountError("Operation requires at least one numeric value.")
@@ -337,6 +393,8 @@ class Rpn(OperatorsMixin):
                 # to execute the expression, then raise an error.
                 raise ValueCountError("Not enough values to perform operation.")
 
+        # If character is a numeric value from 0 - 9, convert it 
+        # to a float and appent to stack.
         elif new_char in self.NUMBERS:
             self.stacker.append(float(new_char))
         
