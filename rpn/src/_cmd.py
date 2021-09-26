@@ -8,6 +8,7 @@ __all__ = [
 
 import re
 import cmd
+import subprocess
 from os import linesep
 
 from ._rpn import Expression, Rpn
@@ -199,6 +200,31 @@ class RpnShell(cmd.Cmd):
     # -/ END: Aliases
 
 
+    # - BEGIN: Runtime
+    def do_clear(self, intro=None):
+        try:
+            subprocess.check_call("clear", stderr=subprocess.STDOUT, shell=True)
+        except subprocess.CalledProcessError as e:
+            print(e)
+
+    def do_q(self, arg):
+        """Alias for `exit`
+        """
+        self.do_exit(arg)
+        
+    def do_exit(self, arg):
+        """Exit program with return code 0.
+        """
+        exit_program()
+
+    def do_restart(self, intro=None):
+        return cmd.Cmd.cmdloop(self, intro)
+    
+    def do_EOF(self, line):
+        return True
+    # -/ END: Runtime
+
+
     # - BEGIN: Help
     def help_calc(self):
         lines = (
@@ -220,22 +246,14 @@ class RpnShell(cmd.Cmd):
         """.strip().split(linesep)
         print(f"{linesep}".join(lines))       
 
+    def help_clear(self):
+        lines = "$ clear", "Clear current prompt."
+        printh(lines)
+
+    def help_restart(self):
+        lines = "$ restart", "Restart program."
+        printh(lines)        
     # -/ END: Help
-
-
-    # - BEGIN: Runtime
-    def do_q(self, arg):
-        """Alias for `exit`
-        """
-        self.do_exit(arg)
-        
-    def do_exit(self, arg):
-        """Exit program with return code 0.
-        """
-        exit_program()
-
-    # -/ END: Runtime
-
 
     #TODO: Implement ability to add expression.
     # def do_add_expr(self, arg):

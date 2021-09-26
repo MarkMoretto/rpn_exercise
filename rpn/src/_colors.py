@@ -50,32 +50,32 @@ class SGRColors:
     # End statement for color section
     # Can be used in concert with the remaining options,
     # but should not be used to start a sequence.    
-    end             = "\x1b[0m"
+    end = "\033[0m"
 
-    purple          = "\x1b[35m"
-    purple_lt       = "\x1b[95m"
-    purp_lt_blink   = "\x1b[6;95m"
+    purple = "\033[35m"
+    purple_lt = "\033[95m"
+    purp_lt_blink = "\033[6;95m"
 
-    yellow          = "\x1b[33m"
-    yellow_lt       = "\x1b[93m"    
-    yel_blink       = "\x1b[6;33m"
+    yellow = "\033[33m"
+    yellow_lt = "\033[93m"    
+    yel_blink = "\033[6;33m"
 
-    cyan            = "\x1b[36m"
-    cyan_blink      = "\x1b[6;36m"
+    cyan = "\033[36m"
+    cyan_blink = "\033[6;36m"
 
-    cyan_lt         = "\x1b[96m"
-    cyan_lt_blink   = "\x1b[6;96m"
+    cyan_lt = "\033[96m"
+    cyan_lt_blink = "\033[6;96m"
 
-    red             = "\x1b[31m"
-    red_lt          = "\x1b[1;31m"
-    red_blink       = "\x1b[6;31m"
+    red = "\033[31m"
+    red_lt = "\033[1;31m"
+    red_blink = "\033[6;31m"
 
-    green           = "\x1b[32m"
-    green_lt        = "\x1b[92m"    
-    grn_blink       = "\x1b[6;32m"
+    green = "\033[32m"
+    green_lt = "\033[92m"    
+    grn_blink = "\033[6;32m"
 
-    blue            = "\x1b[34m"
-    blue_lt         = "\x1b[94m"
+    blue = "\033[34m"
+    blue_lt = "\033[94m"
 
 
 ############################

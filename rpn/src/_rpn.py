@@ -15,17 +15,153 @@ import math
 import statistics
 
 from ._types import (
+    AnyMatrix,
+    AnyStr,
     FloatList,
     FuncReturnNum,
     IntList,
     List, 
     Num,
+    NumList,
+    StrList,
     TupIntHomo,
     TupStrHomo,
     )
 from ._exceptions import ValueCountError
 
 
+class DisplayMixin:
+    def __init__(self):
+        pass
+
+    @property
+    def padding(self, padding_percentage: float = 1.5) -> float:
+        """Standardize padding to value between 0 and 100.
+
+        Returns
+        -------
+        float
+            Adjusted numeric value as calculated percent.        
+        """
+        return padding_percentage if padding_percentage < 10.0 else padding_percentage / 100
+
+
+    def create_width_formatted_line(self, items_list: StrList, length_list: IntList) -> str:
+        """Map string list to lengths list for formatted output by width.
+
+        Parameters
+        ----------
+        items_list : StrList
+            List of items to display with appropriate formatting.
+        length_list : IntList
+            List of integer values that aligns with items_list to produce proper formatting.
+
+        Returns
+        -------
+        str        
+        """
+        return "".join([f"{c:<{l}}" for c, l in zip(items_list, length_list)])
+
+    def create_width_formatted_line_from_matrix(self, item_matrix: AnyMatrix, length_list: IntList) -> StrList:
+        """Run `create_width_formatted_line()` with a multidimensional object.
+        
+        Parameters
+        ----------
+        item_matrix : AnyMatrix
+            List of lists that need to be formatted for display.
+
+        length_list : IntList
+            List of integer values that aligns with items_list to produce proper formatting.
+
+        Returns
+        -------
+        StrList
+            List of formatted strings
+        """
+        _output = []
+        for line in item_matrix:
+            _output.append(
+                self.create_width_formatted_line(line, length_list)
+                )
+        return _output
+
+    def __get_length_data(self, obj: AnyMatrix) -> NumList:
+        _max_len_list = [0] * len(obj)
+
+        for i, c in enumerate(obj):
+            if len(c) > _max_len_list[i]:
+                _max_len_list[i] = len(c)
+        return _max_len_list
+        
+
+    def set_length_data(self, obj: AnyMatrix) -> NumList:
+        """Calculate padding amount for description columns.
+
+        Parameters
+        ----------
+        _padding : float
+            Amount of padding for each column.  Can be whole number or decimal.
+            Values at or over 100 will be reduced to decimal.
+
+        Returns
+        -------
+        IntList
+            List of integer values representing text padding for each column.
+        """
+        _max_len_list = [0] * 3
+
+        # self.__get_length_data()
+        for e in self.OPERATIONS:
+            for i, length in enumerate(e.lengths):
+                if length > _max_len_list[i]:
+                    _max_len_list[i] = length
+
+        # Consider if column heading is wider than the max
+        # width for a given column.
+        for i, c in enumerate(self.description_cols):
+            if len(c) > _max_len_list[i]:
+                _max_len_list[i] = len(c)
+            
+        # Add padding to columns.
+        return [int(n * self.padding) for n in _max_len_list]
+
+    
+    def descriptions(self, padding = 1.5) -> None:
+        """Print out basic table of operators, signatures, and expressions.
+        
+        Parameters
+        ----------
+        padding : float
+            Amount to pad columns by.  If greater than or equal to 10.0, will 
+            divide by 100.
+
+        Returns
+        -------
+        None            
+        """
+        max_len_list = self.set_length_data(padding)
+
+        _msg = []
+        _submsg = self.create_width_formatted_line(self.description_cols, max_len_list)
+
+        _msg.append(_submsg)
+        _msg.append("-" * sum(max_len_list))
+
+        
+        for expr in self.OPERATIONS:
+            _submsg = "".join([f"{e:<{L}}" for e, L in zip(expr.values, max_len_list)])
+            _msg.append(_submsg)
+
+        # Little room for easier reading on prompt.
+        _msg.insert(0, "")
+        _msg.append("")
+
+        print("\n".join(_msg))
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 class Expression:
     """Expression class. Handles single mathematical expression.
     
@@ -109,6 +245,9 @@ class Expression:
         return self.alias, self.signature, self.func_string 
 
 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 class OperatorsMixin:
     """Operators mixin.
     
@@ -273,17 +412,31 @@ class OperatorsMixin:
         print("\n".join(_msg))
 
 
+class ComparisonMixin:
+    @staticmethod
+    def is_string(obj: AnyStr) -> bool:
+        """Return True if value is string data type;
+        False otherwise.
 
-class Rpn(OperatorsMixin):
-    """Main Reverse Polish Notation (RPN) class.
-    """
-    def __init__(self) -> None:
-        super().__init__()
-        self.stacker = []
-        self.current_char = None
+        Returns
+        -------
+        bool        
+        """
+        return isinstance(obj, str)
 
     @staticmethod
-    def is_int(obj: str) -> bool:
+    def is_float(number_string: str) -> bool:
+        """Return True if value is float data type;
+        False otherwise.
+
+        Returns
+        -------
+        bool        
+        """
+        return isinstance(number_string, float)
+
+    @staticmethod
+    def is_int(number_string: str) -> bool:
         """Return True if value is int data type;
         False otherwise.
 
@@ -291,9 +444,19 @@ class Rpn(OperatorsMixin):
         -------
         bool        
         """
-        if isinstance(obj, str):
-            return float(obj).is_integer()
+        if isinstance(number_string, str):
+            return float(number_string).is_integer()
         raise ValueError("Integer or float numberic string value expected.")
+
+
+
+class Rpn(OperatorsMixin, ComparisonMixin):
+    """Main Reverse Polish Notation (RPN) class.
+    """
+    def __init__(self) -> None:
+        super().__init__()
+        self.stacker = []
+        self.current_char = None
 
     @property
     def remove_last(self) -> None:
@@ -315,7 +478,7 @@ class Rpn(OperatorsMixin):
         -------
         None        
         """
-        self.stacker = []
+        self.stacker.clear()
 
     @property
     def status(self) -> FloatList:
