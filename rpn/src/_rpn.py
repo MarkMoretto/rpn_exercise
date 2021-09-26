@@ -2,7 +2,9 @@
 # -*- coding: utf-8 -*-
 
 __all__ = [
+    "ComparisonMixin",
     "Expression",
+    "OperatorsMixin",
     "Rpn",
     ]
 
@@ -15,6 +17,7 @@ import math
 import statistics
 
 from ._types import (
+    Any,
     AnyMatrix,
     AnyStr,
     FloatList,
@@ -27,136 +30,6 @@ from ._types import (
     TupIntHomo,
     TupStrHomo,
     )
-from ._exceptions import ValueCountError
-
-
-class DisplayMixin:
-    def __init__(self):
-        pass
-
-    @property
-    def padding(self, padding_percentage: float = 1.5) -> float:
-        """Standardize padding to value between 0 and 100.
-
-        Returns
-        -------
-        float
-            Adjusted numeric value as calculated percent.        
-        """
-        return padding_percentage if padding_percentage < 10.0 else padding_percentage / 100
-
-
-    def create_width_formatted_line(self, items_list: StrList, length_list: IntList) -> str:
-        """Map string list to lengths list for formatted output by width.
-
-        Parameters
-        ----------
-        items_list : StrList
-            List of items to display with appropriate formatting.
-        length_list : IntList
-            List of integer values that aligns with items_list to produce proper formatting.
-
-        Returns
-        -------
-        str        
-        """
-        return "".join([f"{c:<{l}}" for c, l in zip(items_list, length_list)])
-
-    def create_width_formatted_line_from_matrix(self, item_matrix: AnyMatrix, length_list: IntList) -> StrList:
-        """Run `create_width_formatted_line()` with a multidimensional object.
-        
-        Parameters
-        ----------
-        item_matrix : AnyMatrix
-            List of lists that need to be formatted for display.
-
-        length_list : IntList
-            List of integer values that aligns with items_list to produce proper formatting.
-
-        Returns
-        -------
-        StrList
-            List of formatted strings
-        """
-        _output = []
-        for line in item_matrix:
-            _output.append(
-                self.create_width_formatted_line(line, length_list)
-                )
-        return _output
-
-    def __get_length_data(self, obj: AnyMatrix) -> NumList:
-        _max_len_list = [0] * len(obj)
-
-        for i, c in enumerate(obj):
-            if len(c) > _max_len_list[i]:
-                _max_len_list[i] = len(c)
-        return _max_len_list
-        
-
-    def set_length_data(self, obj: AnyMatrix) -> NumList:
-        """Calculate padding amount for description columns.
-
-        Parameters
-        ----------
-        _padding : float
-            Amount of padding for each column.  Can be whole number or decimal.
-            Values at or over 100 will be reduced to decimal.
-
-        Returns
-        -------
-        IntList
-            List of integer values representing text padding for each column.
-        """
-        _max_len_list = [0] * 3
-
-        # self.__get_length_data()
-        for e in self.OPERATIONS:
-            for i, length in enumerate(e.lengths):
-                if length > _max_len_list[i]:
-                    _max_len_list[i] = length
-
-        # Consider if column heading is wider than the max
-        # width for a given column.
-        for i, c in enumerate(self.description_cols):
-            if len(c) > _max_len_list[i]:
-                _max_len_list[i] = len(c)
-            
-        # Add padding to columns.
-        return [int(n * self.padding) for n in _max_len_list]
-
-    
-    def descriptions(self, padding = 1.5) -> None:
-        """Print out basic table of operators, signatures, and expressions.
-        
-        Parameters
-        ----------
-        padding : float
-            Amount to pad columns by.  If greater than or equal to 10.0, will 
-            divide by 100.
-
-        Returns
-        -------
-        None            
-        """
-        max_len_list = self.set_length_data(padding)
-
-        _msg = []
-        _submsg = self.create_width_formatted_line(self.description_cols, max_len_list)
-
-        _msg.append(_submsg)
-        _msg.append("-" * sum(max_len_list))
-
-        
-        for expr in self.OPERATIONS:
-            _submsg = "".join([f"{e:<{L}}" for e, L in zip(expr.values, max_len_list)])
-            _msg.append(_submsg)
-
-        # Little room for easier reading on prompt.
-        _msg.insert(0, "")
-        _msg.append("")
-
-        print("\n".join(_msg))
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -333,6 +206,23 @@ class OperatorsMixin:
         if _idx > -1:
             self.del_nth(_idx)
 
+
+    def clean_up_whitespace(self, obj: str) -> str:
+        """Return string value with only single character whitespace elements
+        and no leading or lagging whitespace.
+
+        Parameters
+        ----------
+        obj : str
+            String object to process.
+
+        Returns
+        -------
+        str
+            String object with only single whitespace characters, if any.
+        """        
+        return re.sub(r"\s{2,}", " ", str(obj).strip())
+
     def get_function(self, alias: str):
         _idx = self.operation_index(alias)
         if _idx > -1:
@@ -414,7 +304,7 @@ class OperatorsMixin:
 
 class ComparisonMixin:
     @staticmethod
-    def is_string(obj: AnyStr) -> bool:
+    def is_string(obj: Any) -> bool:
         """Return True if value is string data type;
         False otherwise.
 
@@ -425,7 +315,7 @@ class ComparisonMixin:
         return isinstance(obj, str)
 
     @staticmethod
-    def is_float(number_string: str) -> bool:
+    def is_float(obj: Any) -> bool:
         """Return True if value is float data type;
         False otherwise.
 
@@ -433,10 +323,16 @@ class ComparisonMixin:
         -------
         bool        
         """
-        return isinstance(number_string, float)
+        if ComparisonMixin.is_string(obj):
+            try:
+                return not float(obj).is_integer()
+            except ValueError:
+                return False
+        else:
+            return isinstance(obj, float)
 
     @staticmethod
-    def is_int(number_string: str) -> bool:
+    def is_int(obj: Any) -> bool:
         """Return True if value is int data type;
         False otherwise.
 
@@ -444,10 +340,42 @@ class ComparisonMixin:
         -------
         bool        
         """
-        if isinstance(number_string, str):
-            return float(number_string).is_integer()
-        raise ValueError("Integer or float numberic string value expected.")
+        if ComparisonMixin.is_string(obj):
+            try:
+                return float(obj).is_integer()
+            except ValueError:
+                pass
+        else:
+            return isinstance(obj, int)
 
+
+    @staticmethod
+    def is_number(obj: Any) -> bool:
+        """Return True if value is float or int data type;
+        False otherwise.
+
+        Returns
+        -------
+        bool        
+        """
+        _result = False
+        if (ComparisonMixin.is_float(obj) or ComparisonMixin.is_int(obj)):
+            _result = True
+        return _result
+
+    @staticmethod
+    def has_whitespace(obj: str) -> bool:
+        """Return True if value contains whitespace;
+        False otherwise.
+
+        Returns
+        -------
+        bool        
+        """
+        _result = False
+        if re.search(r"\s+", str(obj).strip()):
+            _result = True
+        return _result
 
 
 class Rpn(OperatorsMixin, ComparisonMixin):
@@ -457,6 +385,19 @@ class Rpn(OperatorsMixin, ComparisonMixin):
         super().__init__()
         self.stacker = []
         self.current_char = None
+
+    def __repr__(self):
+        return f"<RPN {self.stacker} >"
+
+
+    def __str__(self):
+        _msg = "None"
+        if len(self.stacker) > 0:
+            if len(self.stacker) == 1:
+                return f"{self.stacker[-1]}"
+            return f"{self.stacker}"
+        return "None"
+            
 
     @property
     def remove_last(self) -> None:
@@ -531,12 +472,14 @@ class Rpn(OperatorsMixin, ComparisonMixin):
         None
 
         """
-        _idx = self.operation_index(new_char)
-
-        #TODO: Update for any digit, not just single digits.
-
         # Character found in valid operator set.
-        if new_char in self.operators:
+        if self.is_number(new_char):
+            self.stacker.append(float(new_char))
+        
+        elif new_char in self.operators:
+
+            _idx = self.operation_index(new_char)
+
             if len(self.stacker) > 1:
                 # Expressions with two parameters.
                 self.stacker.append(self.OPERATIONS[_idx].function(self.stacker.pop(), self.stacker.pop()))
@@ -549,17 +492,12 @@ class Rpn(OperatorsMixin, ComparisonMixin):
 
                 else:
                     # If the selected next operator requires 
-                    raise ValueCountError("Operation requires at least one numeric value.")
+                    raise ValueError("Operation requires at least one numeric value.")
 
             else:
                 # If new_char is an operator, but there are not enough values
                 # to execute the expression, then raise an error.
-                raise ValueCountError("Not enough values to perform operation.")
-
-        # If character is a numeric value from 0 - 9, convert it 
-        # to a float and appent to stack.
-        elif new_char in self.NUMBERS:
-            self.stacker.append(float(new_char))
+                raise ValueError("Not enough values to perform operation.")
         
         else:
             # If a non-numeric or non-valid operator are passed, raise error.

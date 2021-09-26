@@ -165,6 +165,30 @@ class RpnTestCase(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.rpn.execute_next("{")
 
+
+# rpn.execute_next("5")
+# rpn.execute_next("5")
+# rpn.execute_next("5")
+# rpn.execute_next("8")
+# rpn.execute_next("+")
+# rpn.execute_next("+")
+# rpn.execute_next("-")
+# rpn.execute_next("13")
+
+
+# rpn.reset
+# rpn.execute_next("5")
+# rpn.execute_next("8")
+# rpn.execute_next("+")
+
+
+# rpn.reset
+# rpn.execute_next("-3")
+# rpn.execute_next("-2")
+# rpn.execute_next("*")
+# rpn.execute_next("5")
+# rpn.execute_next("+")
+
     def tearDown(self):
         del self.rpn
 

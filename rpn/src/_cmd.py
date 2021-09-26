@@ -30,14 +30,13 @@ PROMPT = f"{C.cyan}~~> {C.end}"
 HEADER = "\n" + "\n".join(header_lines)
 
 RPN = Rpn()
-OPERATORS_ALL = RPN.NUMBERS.union(RPN.operators)
 
 
 def exit_program():
     println(f"{linesep}Goodbye!")
     exit(0)
 
-def parse_arg(string: str, opers: set = OPERATORS_ALL) -> StrList:
+def parse_arg(string: str) -> StrList:
     """Returns list of characters from a string that are valid
     operators or numeric values.
 
@@ -45,21 +44,20 @@ def parse_arg(string: str, opers: set = OPERATORS_ALL) -> StrList:
     ----------
     string : str
         Input string object to parse.
-    opers : set
-        Set of operators to validate each character against.
-    
+
     Returns
     -------
     StrList
         List of string objects.
     """
-    if string:
-        if len(string) == 2 and RPN.is_int(string):
-            return [string]
+    if string and len(string) > 0:
+        string = RPN.clean_up_whitespace(string)
 
-        elif len(string) > 0:
-            res = "".join([c for c in string if c in opers])
-            return list(res)
+        if len(string) == 2 and RPN.is_number(string):
+            return [string]
+            
+        res = " ".join([c for c in string.split() if c in RPN.operators or RPN.is_number(c)])
+        return list(res.split())
 
 def println(obj: str) -> None:
     """Print to standard output with a newline character attached
