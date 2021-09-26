@@ -475,6 +475,7 @@ class Rpn(OperatorsMixin, ComparisonMixin):
         # Character found in valid operator set.
         if self.is_number(new_char):
             self.stacker.append(float(new_char))
+            return 0, ""
         
         elif new_char in self.operators:
 
@@ -483,25 +484,31 @@ class Rpn(OperatorsMixin, ComparisonMixin):
             if len(self.stacker) > 1:
                 # Expressions with two parameters.
                 self.stacker.append(self.OPERATIONS[_idx].function(self.stacker.pop(), self.stacker.pop()))
-
+                return 0, ""
             # If there is only one value in the stack.
             elif len(self.stacker) == 1:
                 # See if new_char in single-arg operations collection and run.
                 if new_char in self.OPERATIONS_EXT:
                     self.stacker.append(self.OPERATIONS[_idx].function(self.stacker.pop()))
-
+                    return 0, ""
                 else:
                     # If the selected next operator requires 
-                    raise ValueError("Operation requires at least one numeric value.")
+                    # raise ValueError("Operation requires at least one numeric value.")
+                    # print("Operation requires at least one numeric value.")
+                    return 1, "Operation requires at least one numeric value."
 
             else:
                 # If new_char is an operator, but there are not enough values
                 # to execute the expression, then raise an error.
-                raise ValueError("Not enough values to perform operation.")
+                # raise ValueError("Not enough values to perform operation.")
+                # print("Not enough values to perform operation.")
+                return 2, "Not enough values to perform operation."
         
         else:
             # If a non-numeric or non-valid operator are passed, raise error.
-            raise ValueError("Values must be valid number or operator.")
+            # raise ValueError("Values must be valid number or operator.")
+            # print("Values must be valid number or operator.")
+            return 3, "Values must be valid number or operator."
 
 
 if __name__ == "__main__":

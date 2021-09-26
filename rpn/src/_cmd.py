@@ -29,6 +29,7 @@ header_lines = [
 PROMPT = f"{C.cyan}~~> {C.end}"
 HEADER = "\n" + "\n".join(header_lines)
 
+# Instance Rpn() class
 RPN = Rpn()
 
 
@@ -53,9 +54,9 @@ def parse_arg(string: str) -> StrList:
     if string and len(string) > 0:
         string = RPN.clean_up_whitespace(string)
 
-        if len(string) == 2 and RPN.is_number(string):
-            return [string]
-            
+        # if len(string) == 2 and RPN.is_number(string):
+        #     return [string]
+
         res = " ".join([c for c in string.split() if c in RPN.operators or RPN.is_number(c)])
         return list(res.split())
 
@@ -113,11 +114,14 @@ class RpnShell(cmd.Cmd):
                 self.persist.extend(_tmp)    
 
                 for el in _tmp:
-                    self.rpn.execute_next(el)
-                
-                if self.first_entry:
-                    self.first_entry = False
+                    g, msg = self.rpn.execute_next(el)
+                    if g != 0:
+                        print(msg)
+                        break
 
+                    elif self.first_entry:
+                        self.first_entry = False
+                        
                 else:
                     self.do_calc(None)
 
@@ -129,7 +133,7 @@ class RpnShell(cmd.Cmd):
         exit_program()
 
     # - BEGIN: Actions
-    def do_calc(self, arg) -> None:
+    def do_calc(self, arg, is_final = False) -> None:
         if len(self.rpn.stacker) == 1:
             self.do_result(None)
         else:
@@ -216,7 +220,10 @@ class RpnShell(cmd.Cmd):
         exit_program()
 
     def do_restart(self, intro=None):
-        return cmd.Cmd.cmdloop(self, intro)
+        self.do_reset(None)
+        self.do_clear()
+        RpnShell().cmdloop()
+        # return cmd.Cmd.cmdloop(self, intro)
     
     def do_EOF(self, line):
         return True
@@ -252,30 +259,3 @@ class RpnShell(cmd.Cmd):
         lines = "$ restart", "Restart program."
         printh(lines)        
     # -/ END: Help
-
-    #TODO: Implement ability to add expression.
-    # def do_add_expr(self, arg):
-    #     """Work in progress."""
-        # gcd lambda a, b: mathgcd(b, a)
-        # _tmp = arg.split(" ", maxsplit = 1)
-        # if len(_tmp) == 2:
-        #     _sig, _func = [str(s).strip() for s in _tmp]
-        #     print(_sig, _func)
-        #     self.rpn.add_expression(_sig, _func)
-        #     print(f"Added operator {_sig} into cache.")
-
-
-    # def help_add_expr(self, arg):
-    #     lines = """Create and add function into the mix.
-
-    #     Arguments
-    #     ---------
-    #     arg : str
-    #         Line in command prompt. First argumetn should be sign or 
-    #         operator name/alias.
-    #         Second argument should be lambda function with appropriate arguments.
-    #             Current standard library packages available are:
-    #                 math
-    #                 statistics
-    #     """.strip().split("\n")
-    #     print("\n".join(lines))         
