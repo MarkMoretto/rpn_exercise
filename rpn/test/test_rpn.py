@@ -104,9 +104,9 @@ class RpnTestCase(unittest.TestCase):
 
     def test_expression_add_expression(self):
         """Testing Rpn.new_expression()"""
-        prev_len = len(self.rpn.OPERATIONS)
+        prev_len = len(self.rpn.OPS_DOUBLE_ARG)
         self.rpn.add_expression("gcd", lambda a, b: math.gcd(b, a))
-        post_len = len(self.rpn.OPERATIONS)
+        post_len = len(self.rpn.OPS_DOUBLE_ARG)
         self.assertGreater(post_len, prev_len)
 
     def test_rpn_reset(self):
@@ -165,29 +165,100 @@ class RpnTestCase(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.rpn.execute_next("{")
 
+    def test_rpn_stack_size(self):
+        """Testing Rpn.stack_size property for one valid value.
+        """
+        expected = 1
+        self.rpn.reset
+        self.rpn.execute_next("2")
+        self.assertEqual(self.rpn.stack_size, expected)
 
-# rpn.execute_next("5")
-# rpn.execute_next("5")
-# rpn.execute_next("5")
-# rpn.execute_next("8")
-# rpn.execute_next("+")
-# rpn.execute_next("+")
-# rpn.execute_next("-")
-# rpn.execute_next("13")
+    def test_rpn_stack_size_anti(self):
+        """Testing Rpn.stack_size property for one valid value.
+        """
+        expected = 0
+        self.rpn.reset
+        self.rpn.execute_next("+")
+        self.assertEqual(self.rpn.stack_size, expected)        
+
+    def tearDown(self):
+        del self.rpn
+
+class RpnExecutionTestCase(unittest.TestCase):
+    def setUp(self):
+        self.rpn = Rpn()
 
 
-# rpn.reset
-# rpn.execute_next("5")
-# rpn.execute_next("8")
-# rpn.execute_next("+")
+    def test_rpn_execution_case_1(self):
+        """Test expression:
+        5 8 +
+        """
+        expected = 13
+        self.rpn.execute_next("5")
+        self.rpn.execute_next("8")
+        self.rpn.execute_next("+")
+        self.assertEqual(self.rpn.result, expected)
+
+    def test_rpn_execution_case_2(self):
+        """Test expression:
+        5 5 5 8 + + -
+        """
+        expected = -13
+        
+        self.rpn.execute_next("5")
+        self.rpn.execute_next("5")
+        self.rpn.execute_next("5")
+        self.rpn.execute_next("8")
+        self.rpn.execute_next("+")
+        self.rpn.execute_next("+")
+        self.rpn.execute_next("-")
+
+        self.assertEqual(self.rpn.result, expected)
+
+    def test_rpn_execution_case_3(self):
+        """Test expression:
+        5 5 5 8 + + -
+        13 +
+        """
+        expected = 0
+        
+        self.rpn.execute_next("5")
+        self.rpn.execute_next("5")
+        self.rpn.execute_next("5")
+        self.rpn.execute_next("8")
+        self.rpn.execute_next("+")
+        self.rpn.execute_next("+")
+        self.rpn.execute_next("-")
+
+        self.rpn.execute_next("13")
+        self.rpn.execute_next("+")
+
+        self.assertEqual(self.rpn.result, expected)
 
 
-# rpn.reset
-# rpn.execute_next("-3")
-# rpn.execute_next("-2")
-# rpn.execute_next("*")
-# rpn.execute_next("5")
-# rpn.execute_next("+")
+    def test_rpn_execution_case_4(self):
+        """Test expression:
+        -3 -2 * 5 +
+        """
+        expected = 11
+        self.rpn.execute_next("-3")
+        self.rpn.execute_next("-2")
+        self.rpn.execute_next("*")
+        self.rpn.execute_next("5")
+        self.rpn.execute_next("+")
+        self.assertEqual(self.rpn.result, expected)
+
+    def test_rpn_execution_case_5(self):
+        """Test expression:
+        5 9 1 - /
+        """
+        expected = 0.625
+        self.rpn.execute_next("5")
+        self.rpn.execute_next("9")
+        self.rpn.execute_next("1")
+        self.rpn.execute_next("-")
+        self.rpn.execute_next("/")
+        self.assertEqual(self.rpn.result, expected)
 
     def tearDown(self):
         del self.rpn

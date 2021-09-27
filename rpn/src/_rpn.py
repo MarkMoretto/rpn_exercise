@@ -131,15 +131,16 @@ class OperatorsMixin:
     CAPTURE_FUNC_REGEX: str = r"(?:.+:)\s*(.+),"
 
     # Operations with two parameters.
-    OPERATIONS = [
+    OPS_DOUBLE_ARG = [
         Expression("+", lambda a, b: math.fsum([a, b])),
         Expression("-", lambda a, b: b - a),
         Expression("*", lambda a, b: b * a),
         Expression("/", lambda a, b: b / a if a != 0 else math.inf),
-        Expression("^", lambda a, b: math.pow(b, a)),     
+        Expression("^", lambda a, b: math.pow(b, a)),
+        Expression("log", lambda n, base: math.log(n, base)),
     ]
 
-    OPERATIONS_EXT = [
+    OPS_SINGLE_ARG = [
         Expression("log", lambda n, base: math.log(n, base)),
         Expression("sin", lambda n: math.sin(n)),
         Expression("cos", lambda n: math.cos(n)),
@@ -152,25 +153,25 @@ class OperatorsMixin:
 
     def __init__(self) -> None:
         self.description_cols = "Oper", "Args", "Function"
-        self.OPERATIONS.extend(self.OPERATIONS_EXT)
+        self.OPS_DOUBLE_ARG.extend(self.OPS_SINGLE_ARG)
 
     def __update_ops(self):
-        self.OPERATIONS.extend(self.OPERATIONS_EXT)
+        self.OPS_DOUBLE_ARG.extend(self.OPS_SINGLE_ARG)
 
     @property
     def operators(self):
-        return set([o.alias for o in self.OPERATIONS])
+        return set([o.alias for o in self.OPS_DOUBLE_ARG])
 
     def del_nth(self, n):
         """Use `deque` library to remove item
-        from OPERATIONS list by the item's index.
+        from OPS_DOUBLE_ARG list by the item's index.
         """
-        ops = self.OPERATIONS
+        ops = self.OPS_DOUBLE_ARG
         d = deque(ops)
         d.rotate(-n)
         d.popleft()
         d.rotate(n)
-        self.OPERATIONS = list(d)
+        self.OPS_DOUBLE_ARG = list(d)
 
     def operation_index(self, lookup_value: str) -> int:
         """Return index related to lookup_value, which should be 
@@ -180,11 +181,11 @@ class OperatorsMixin:
         -------
         int      
         """
-        _tmp  = (i for i, o in enumerate(self.OPERATIONS) if o.alias == lookup_value)
+        _tmp  = (i for i, o in enumerate(self.OPS_DOUBLE_ARG) if o.alias == lookup_value)
         return next(_tmp, -1)
 
     def add_expression(self, sig: str, fn: str) -> None:
-        """Add new function to OPERATIONS.
+        """Add new function to OPS_DOUBLE_ARG.
 
         Returns
         -------
@@ -192,11 +193,11 @@ class OperatorsMixin:
         """
         e = Expression(sig, fn)
         if not e.alias in self.operators:
-            self.OPERATIONS.append(e)
+            self.OPS_DOUBLE_ARG.append(e)
             self.set_length_data()
 
     def remove_expression(self, operator_alias: str) -> None:
-        """Delete item from OPERATIONS collection by key.
+        """Delete item from OPS_DOUBLE_ARG collection by key.
 
         Returns
         -------
@@ -244,7 +245,7 @@ class OperatorsMixin:
         """
         _max_len_list = [0] * 3
 
-        for e in self.OPERATIONS:
+        for e in self.OPS_DOUBLE_ARG:
             for i, length in enumerate(e.lengths):
                 if length > _max_len_list[i]:
                     _max_len_list[i] = length
@@ -291,7 +292,7 @@ class OperatorsMixin:
         _msg.append(_submsg)
         _msg.append("-" * sum(max_len_list))
 
-        for expr in self.OPERATIONS:
+        for expr in self.OPS_DOUBLE_ARG:
             _submsg = "".join([f"{e:<{L}}" for e, L in zip(expr.values, max_len_list)])
             _msg.append(_submsg)
 
@@ -397,7 +398,12 @@ class Rpn(OperatorsMixin, ComparisonMixin):
                 return f"{self.stacker[-1]}"
             return f"{self.stacker}"
         return "None"
-            
+
+    @property
+    def stack_size(self) -> int:
+        """Return size of current stacker.
+        """
+        return len(self.stacker)
 
     @property
     def remove_last(self) -> None:
@@ -458,7 +464,6 @@ class Rpn(OperatorsMixin, ComparisonMixin):
 
         return _result
 
-
     def execute_next(self, new_char: str) -> None:
         """Update stack with new numeric value or valid expression execution.
         
@@ -481,34 +486,30 @@ class Rpn(OperatorsMixin, ComparisonMixin):
 
             _idx = self.operation_index(new_char)
 
-            if len(self.stacker) > 1:
-                # Expressions with two parameters.
-                self.stacker.append(self.OPERATIONS[_idx].function(self.stacker.pop(), self.stacker.pop()))
-                return 0, ""
-            # If there is only one value in the stack.
-            elif len(self.stacker) == 1:
-                # See if new_char in single-arg operations collection and run.
-                if new_char in self.OPERATIONS_EXT:
-                    self.stacker.append(self.OPERATIONS[_idx].function(self.stacker.pop()))
-                    return 0, ""
+            if self.stack_size > 0:
+                # If single number left in stack and current character in single-argument
+                # operator list, run the argument and return -1 to indicate that the 
+                # final output should be processed.
+                if self.stack_size == 1:
+                    if new_char in self.OPS_SINGLE_ARG:
+                        self.stacker.append(self.OPS_SINGLE_ARG[_idx].function(self.stacker.pop()))
+                    return -1, ""
+                    
                 else:
-                    # If the selected next operator requires 
-                    # raise ValueError("Operation requires at least one numeric value.")
-                    # print("Operation requires at least one numeric value.")
-                    return 1, "Operation requires at least one numeric value."
+                    self.stacker.append(self.OPS_DOUBLE_ARG[_idx].function(self.stacker.pop(), self.stacker.pop()))
+
+                    return 0, ""
 
             else:
                 # If new_char is an operator, but there are not enough values
                 # to execute the expression, then raise an error.
-                # raise ValueError("Not enough values to perform operation.")
-                # print("Not enough values to perform operation.")
-                return 2, "Not enough values to perform operation."
+                return 1, "Not enough values to perform operation."
         
         else:
             # If a non-numeric or non-valid operator are passed, raise error.
             # raise ValueError("Values must be valid number or operator.")
             # print("Values must be valid number or operator.")
-            return 3, "Values must be valid number or operator."
+            return 1, "Values must be valid number or operator."
 
 
 if __name__ == "__main__":

@@ -220,6 +220,7 @@ class RpnShell(cmd.Cmd):
         exit_program()
 
     def do_restart(self, intro=None):
+        self.persist.clear()
         self.do_reset(None)
         self.do_clear()
         RpnShell().cmdloop()
@@ -256,6 +257,6 @@ class RpnShell(cmd.Cmd):
         printh(lines)
 
     def help_restart(self):
-        lines = "$ restart", "Restart program."
+        lines = "$ restart", "Restart program.", "NOTE: This clears history and current stack."
         printh(lines)        
     # -/ END: Help
