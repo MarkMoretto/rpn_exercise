@@ -60,6 +60,19 @@ def parse_arg(string: str) -> StrList:
         res = " ".join([c for c in string.split() if c in RPN.operators or RPN.is_number(c)])
         return list(res.split())
 
+
+def toggle_first_entry(rpn_cls: Rpn, min_numbers = 2) -> bool:
+    """If stack meets and/or exceeds min_numbers threshold, then 
+    return True, else False.
+    After two numbers are reached, barring special circumstances,
+    any subsequent entries should include an operator and produce
+    a "final" number.  Or, at least an interim final number.
+    """
+    _result = True
+    if len(rpn_cls.status) > 0:
+        _result = sum([1 if rpn_cls.is_number(item) else 0 for item in rpn_cls.status]) >= min_numbers
+    return _result
+
 def println(obj: str) -> None:
     """Print to standard output with a newline character attached
     to the end of the object.
@@ -91,12 +104,13 @@ class RpnShell(cmd.Cmd):
     prompt = PROMPT
     ruler = "-"
     rpn = RPN
-    first_entry = True
+    first_entry = False
     persist = PERSIST.copy()
 
     def default(self, line) -> None:
         """Runs if no specific command is provided by the user.
         """
+        
         if line:
             if line == "EOF":
                 exit_program()
@@ -119,11 +133,12 @@ class RpnShell(cmd.Cmd):
                         print(msg)
                         break
 
-                    elif self.first_entry:
-                        self.first_entry = False
-                        
-                else:
-                    self.do_calc(None)
+                # Toggle first_entry variable.
+                # Populated stack is required            
+                self.first_entry = toggle_first_entry(self.rpn)
+                print(self.first_entry, self.rpn.status)
+                # else:
+                #     self.do_calc(None)
 
 
     def emptyline(self) -> None:
@@ -133,11 +148,12 @@ class RpnShell(cmd.Cmd):
         exit_program()
 
     # - BEGIN: Actions
-    def do_calc(self, arg, is_final = False) -> None:
-        if len(self.rpn.stacker) == 1:
-            self.do_result(None)
-        else:
+    def do_calc(self, arg) -> None:
+        if self.first_entry:
             self.default(arg)
+        else:
+            self.do_result(None)
+
     
     def do_del(self, arg) -> None:
         """Delete last item added to stack.
