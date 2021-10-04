@@ -60,11 +60,26 @@ def parse_arg(string: str) -> StrList:
         res = " ".join([c for c in string.split() if c in RPN.operators or RPN.is_number(c)])
         return list(res.split())
 
+
+def toggle_first_entry(rpn_cls: Rpn, min_numbers = 2) -> bool:
+    """If stack meets and/or exceeds min_numbers threshold, then 
+    return True, else False.
+    After two numbers are reached, barring special circumstances,
+    any subsequent entries should include an operator and produce
+    a "final" number.  Or, at least an interim final number.
+    """
+    _result = True
+    if len(rpn_cls.status) > 0:
+        _result = sum([1 if rpn_cls.is_number(item) else 0 for item in rpn_cls.status]) >= min_numbers
+    return _result
+
+
 def println(obj: str) -> None:
     """Print to standard output with a newline character attached
     to the end of the object.
     """
     print(f"{obj}{linesep}")
+
 
 def printh(iterable) -> None:
     """Print multiline `help` documentation to stdout.
@@ -73,7 +88,7 @@ def printh(iterable) -> None:
 
 
 # Keep history alive unless 'do_ce()' called
-PERSIST = []
+
 
 class RpnShell(cmd.Cmd):
     """RpnShell class.  This is the main 'driver' class for the 
@@ -90,28 +105,50 @@ class RpnShell(cmd.Cmd):
     intro = HEADER
     prompt = PROMPT
     ruler = "-"
+
     rpn = RPN
-    first_entry = True
-    persist = PERSIST.copy()
+    # Helper to determine whether or not to auto-print result.
+    first_entry = False
+    # Helper to determine whether or not to auto-print result.
+    last_entry = False    
+    # Keep history alive unless 'do_ce()' called
+    persistory = []
+    _verbose: bool = False
+
+
+    def reset_entries(self):
+        """Helper method to reset first and last entry flags.
+        """
+        self.first_entry = False
+        self.last_entry = False
+
+    def do_verbose(self, arg):
+        """Toggle verbose output for debugging or...just because.
+        """
+        self._verbose = not self._verbose
+        print(f"Verbose mode is: {'on' if self._verbose else 'off'}.")
+    
 
     def default(self, line) -> None:
         """Runs if no specific command is provided by the user.
         """
+        
         if line:
             if line == "EOF":
                 exit_program()
 
+            # Print the line that was entered to the terminal.
             print(f"{C.yellow_lt}{line}{C.end}")
 
             # Clean-up arguments
-            _tmp = parse_arg(line)
+            _tmp: list = parse_arg(line)
 
             # If more than one argument found, pass each
             # individually for evaluation and updating of
             # current state.
             if len(_tmp) > 0:
                 # add to persistent history
-                self.persist.extend(_tmp)    
+                self.persistory.extend(_tmp)    
 
                 for el in _tmp:
                     g, msg = self.rpn.execute_next(el)
@@ -119,11 +156,27 @@ class RpnShell(cmd.Cmd):
                         print(msg)
                         break
 
-                    elif self.first_entry:
-                        self.first_entry = False
-                        
-                else:
-                    self.do_calc(None)
+                # Toggle first_entry variable.
+                # Populated stack is required   
+                if not self.first_entry:         
+                    self.first_entry = toggle_first_entry(self.rpn)
+
+                # Evaluate last_entry flag
+                if not self.last_entry:
+                    # If the length of the curent stack is 1 and the last entry was an operator,
+                    # set flag to True.  This will output "result" on the current call.
+                    if len(self.rpn.status) == 1 and self.persistory[-1] in self.rpn.operators:
+                        self.last_entry = True
+
+                
+                if self.last_entry:
+                    # do_result should also reset state and the entry flags.
+                    self.do_result(None)
+                
+                if self._verbose:
+                    print(self.first_entry, self.rpn.status)
+                # else:
+                #     self.do_calc(None)
 
 
     def emptyline(self) -> None:
@@ -132,13 +185,11 @@ class RpnShell(cmd.Cmd):
         """
         exit_program()
 
+
     # - BEGIN: Actions
-    def do_calc(self, arg, is_final = False) -> None:
-        if len(self.rpn.stacker) == 1:
-            self.do_result(None)
-        else:
-            self.default(arg)
-    
+    def do_calc(self, arg) -> None:
+        self.default(arg)
+
     def do_del(self, arg) -> None:
         """Delete last item added to stack.
         """
@@ -149,8 +200,8 @@ class RpnShell(cmd.Cmd):
         """Print persistent history to stdout.
         """
         _out = "No history to report!"
-        if len(self.persist) > 0:
-            _out = ", ".join(self.persist)
+        if len(self.persistory) > 0:
+            _out = ", ".join(self.persistory)
         print(_out)
 
     def do_operators(self, arg) -> None:
@@ -158,15 +209,21 @@ class RpnShell(cmd.Cmd):
 
     def do_result(self, arg) -> None:
         """Determine output and send to stdout.
+
+        Resets calculator once called.
         """
         print(f"{C.grn_blink}Result: {self.rpn.result}{C.end}")
+        self.do_reset(None)
 
 
     def do_reset(self, arg) -> None:
         """Reset RPN state.
         """
         self.rpn.reset
-        print("RPN state reset.")
+        self.reset_entries()
+        if self._verbose:
+            print("RPN calculator was reset.")
+
 
     def do_state(self, arg) -> None:
         """Return current state of RPN instance.
@@ -191,7 +248,7 @@ class RpnShell(cmd.Cmd):
         """Alias for `reset` Does "deeper" clear
         of all persistent history.
         """
-        self.persist.clear()
+        self.persistory.clear()
         self.do_reset(None)    
 
     def do_ops(self, arg):
@@ -220,7 +277,9 @@ class RpnShell(cmd.Cmd):
         exit_program()
 
     def do_restart(self, intro=None):
-        self.persist.clear()
+        if self._verbose:
+            print("Restarting RPN calculator...")
+        self.persistory.clear()
         self.do_reset(None)
         self.do_clear()
         RpnShell().cmdloop()
